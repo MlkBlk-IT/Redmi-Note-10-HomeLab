@@ -1,0 +1,166 @@
+# ============================================================
+# Script : Create-AnonNamespace.ps1
+# Objectif : Créer un network namespace isolé sur le Redmi Note 10
+#            pour y faire tourner un VPN (OpenVPN) sans interférence
+#            de Tailscale, avec DNS filtrant dédié et mini-firewall
+#            default-deny propre au namespace.
+# Auteur   : Labo personnel
+# Date     : Août 2026
+# ============================================================
+
+# ---------------------- CONFIGURATION ----------------------
+$AndroidHost = "192.168.x.x"          # <- Mets l'IP de ton Note 10
+$SshUser     = "root"                 # ou user Termux + su -c selon ton setup
+$SshPort     = 8022                   # Change si tu utilises un autre port
+
+# Préfixe réseau du namespace
+$NsName      = "anon_ns"
+$VethHost    = "veth0"
+$VethNs      = "veth1"
+$HostIP      = "10.200.1.1"
+$NsIP        = "10.200.1.2"
+$Subnet      = "10.200.1.0/24"
+$WifiIface   = "wlan0"                # Vérifie avec "ip route" sur le téléphone
+
+# DNS filtrant utilisé DANS le namespace (ex: Quad9 - filtrage malware/phishing)
+$FilteredDNS = "9.9.9.9"
+$DnsPort     = "5353"                 # Port du forwarder local dans le namespace
+
+# Serveur VPN cible (à adapter selon le serveur VPNGate choisi)
+$VpnServerIP   = "0.0.0.0"            # <- IP du serveur VPN (ex: VPNGate)
+$VpnServerPort = "1194"
+$VpnProto      = "udp"                # udp ou tcp selon la config .ovpn
+
+# -----------------------------------------------------------
+
+function Invoke-AndroidCommand {
+    param([string]$Command)
+    
+    Write-Host "`n>>> Exécution : $Command" -ForegroundColor Cyan
+    $result = ssh -p $SshPort "$SshUser@$AndroidHost" $Command 2>&1
+    Write-Host $result
+    return $result
+}
+
+Write-Host "========================================" -ForegroundColor Yellow
+Write-Host "  Création du Network Namespace Anonyme" -ForegroundColor Yellow
+Write-Host "========================================`n"
+
+# 0. Installation des packages requis (idempotent - skip si déjà installés)
+Write-Host "[0/10] Vérification/installation des packages requis..." -ForegroundColor Green
+Invoke-AndroidCommand "pkg install -y openvpn"
+Invoke-AndroidCommand "pkg install -y root-repo"
+Invoke-AndroidCommand "pkg install -y dnsmasq"
+
+# 1. Vérifications préalables
+Write-Host "`n[1/10] Vérifications préalables..." -ForegroundColor Green
+Invoke-AndroidCommand "id"
+Invoke-AndroidCommand "ip netns list"
+Invoke-AndroidCommand "zcat /proc/config.gz | grep NET_NS"
+
+# 2. Nettoyage éventuel d'une ancienne config
+Write-Host "`n[2/10] Nettoyage d'une éventuelle ancienne configuration..." -ForegroundColor Green
+Invoke-AndroidCommand "pkill -9 -f 'dnsmasq.*$NsName' 2>/dev/null || true"
+Invoke-AndroidCommand "ip netns del $NsName 2>/dev/null || true"
+Invoke-AndroidCommand "ip link del $VethHost 2>/dev/null || true"
+
+# 3. Création du namespace
+Write-Host "`n[3/10] Création du namespace $NsName..." -ForegroundColor Green
+Invoke-AndroidCommand "ip netns add $NsName"
+
+# 4. Création de la paire veth
+Write-Host "`n[4/10] Création de la paire veth ($VethHost <-> $VethNs)..." -ForegroundColor Green
+Invoke-AndroidCommand "ip link add $VethHost type veth peer name $VethNs"
+
+# 5. Déplacement d'un bout dans le namespace
+Write-Host "`n[5/10] Déplacement de $VethNs dans le namespace..." -ForegroundColor Green
+Invoke-AndroidCommand "ip link set $VethNs netns $NsName"
+
+# 6. Configuration côté hôte (Android)
+Write-Host "`n[6/10] Configuration côté hôte..." -ForegroundColor Green
+Invoke-AndroidCommand "ip addr add $HostIP/24 dev $VethHost"
+Invoke-AndroidCommand "ip link set $VethHost up"
+
+# 7. Configuration côté namespace
+Write-Host "`n[7/10] Configuration côté namespace..." -ForegroundColor Green
+Invoke-AndroidCommand "ip netns exec $NsName ip addr add $NsIP/24 dev $VethNs"
+Invoke-AndroidCommand "ip netns exec $NsName ip link set $VethNs up"
+Invoke-AndroidCommand "ip netns exec $NsName ip link set lo up"
+Invoke-AndroidCommand "ip netns exec $NsName ip route add default via $HostIP"
+
+# 8. Forwarding + NAT (hôte)
+Write-Host "`n[8/10] Activation du forwarding et du NAT..." -ForegroundColor Green
+Invoke-AndroidCommand "echo 1 > /proc/sys/net/ipv4/ip_forward"
+Invoke-AndroidCommand "iptables -t nat -C POSTROUTING -s $Subnet -o $WifiIface -j MASQUERADE 2>/dev/null || iptables -t nat -A POSTROUTING -s $Subnet -o $WifiIface -j MASQUERADE"
+
+# 9. Mini-firewall default-deny DANS le namespace (AFWall+ ne voit pas ce namespace)
+#    Doit s'exécuter AVANT le lancement de dnsmasq/openvpn dans le namespace.
+Write-Host "`n[9/10] Application du mini-firewall default-deny dans $NsName..." -ForegroundColor Green
+
+# Flush des règles existantes dans le namespace (état propre)
+Invoke-AndroidCommand "ip netns exec $NsName iptables -F"
+Invoke-AndroidCommand "ip netns exec $NsName iptables -X"
+
+# Politique par défaut : tout bloquer
+Invoke-AndroidCommand "ip netns exec $NsName iptables -P OUTPUT DROP"
+Invoke-AndroidCommand "ip netns exec $NsName iptables -P INPUT DROP"
+Invoke-AndroidCommand "ip netns exec $NsName iptables -P FORWARD DROP"
+
+# Loopback (nécessaire pour dnsmasq local sur 127.0.0.1)
+Invoke-AndroidCommand "ip netns exec $NsName iptables -A OUTPUT -o lo -j ACCEPT"
+Invoke-AndroidCommand "ip netns exec $NsName iptables -A INPUT -i lo -j ACCEPT"
+
+# DNS filtrant autorisé (ex: Quad9)
+Invoke-AndroidCommand "ip netns exec $NsName iptables -A OUTPUT -p udp -d $FilteredDNS --dport 53 -j ACCEPT"
+Invoke-AndroidCommand "ip netns exec $NsName iptables -A OUTPUT -p tcp -d $FilteredDNS --dport 53 -j ACCEPT"
+
+# Serveur VPN autorisé (destination + port précis uniquement)
+Invoke-AndroidCommand "ip netns exec $NsName iptables -A OUTPUT -p $VpnProto -d $VpnServerIP --dport $VpnServerPort -j ACCEPT"
+
+# Trafic sortant via tun0 une fois le tunnel VPN monté (déjà chiffré/tunnelé)
+Invoke-AndroidCommand "ip netns exec $NsName iptables -A OUTPUT -o tun0 -j ACCEPT"
+Invoke-AndroidCommand "ip netns exec $NsName iptables -A INPUT -i tun0 -j ACCEPT"
+
+# Connexions établies / liées (retour du trafic autorisé)
+Invoke-AndroidCommand "ip netns exec $NsName iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT"
+Invoke-AndroidCommand "ip netns exec $NsName iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT"
+
+# ---------------------- VÉRIFICATIONS ----------------------
+Write-Host "`n========================================" -ForegroundColor Yellow
+Write-Host "  Vérifications" -ForegroundColor Yellow
+Write-Host "========================================`n"
+
+Write-Host "Namespaces existants :" -ForegroundColor Green
+Invoke-AndroidCommand "ip netns list"
+
+Write-Host "`nInterfaces dans le namespace :" -ForegroundColor Green
+Invoke-AndroidCommand "ip netns exec $NsName ip addr show"
+
+Write-Host "`nRoute par défaut dans le namespace :" -ForegroundColor Green
+Invoke-AndroidCommand "ip netns exec $NsName ip route"
+
+Write-Host "`nRègles firewall actives dans le namespace :" -ForegroundColor Green
+Invoke-AndroidCommand "ip netns exec $NsName iptables -L -n -v"
+
+Write-Host "`nTest de connectivité DNS filtré (doit passer) :" -ForegroundColor Green
+Invoke-AndroidCommand "ip netns exec $NsName ping -c 2 $FilteredDNS"
+
+Write-Host "`nTest de connectivité bloquée (doit échouer - preuve du default-deny) :" -ForegroundColor Green
+Invoke-AndroidCommand "ip netns exec $NsName ping -c 2 1.1.1.1"
+
+Write-Host "`n========================================" -ForegroundColor Yellow
+Write-Host "  [10/10] Namespace prêt avec firewall actif." -ForegroundColor Yellow
+Write-Host "  Prochaines étapes :" -ForegroundColor Yellow
+Write-Host "  1. Lancer dnsmasq (upstream $FilteredDNS, port $DnsPort)" -ForegroundColor Cyan
+Write-Host "     ip netns exec $NsName dnsmasq -p $DnsPort -S $FilteredDNS --no-daemon" -ForegroundColor Cyan
+Write-Host "  2. Lancer OpenVPN dans le namespace" -ForegroundColor Cyan
+Write-Host "     ip netns exec $NsName openvpn --config /chemin/vers/config.ovpn --tmp-dir /tmp" -ForegroundColor Cyan
+Write-Host "========================================`n"
+
+# ---------------------- ROLLBACK (commenté) ----------------------
+<#
+# En cas de problème, décommente et exécute ces lignes :
+Invoke-AndroidCommand "ip netns del $NsName"
+Invoke-AndroidCommand "ip link del $VethHost 2>/dev/null || true"
+Invoke-AndroidCommand "iptables -t nat -D POSTROUTING -s $Subnet -o $WifiIface -j MASQUERADE 2>/dev/null || true"
+#>
