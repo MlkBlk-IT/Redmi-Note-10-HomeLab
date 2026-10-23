@@ -1,33 +1,39 @@
-# Redmi Note 10 — HomeLab Android
+<div align="center">
 
-> Transformation d'un smartphone Android (Xiaomi Redmi Note 10 5G / camellia) en serveur Linux
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:e10600,50:1a0505,100:00ff9c&height=140&section=header&text=Redmi-Note-10-HomeLab&fontSize=42&fontColor=e10600&fontAlignY=32&desc=An%20Android%20phone%20reborn%20as%20a%20Linux%20server%20%E2%80%94%20kernel%2C%20netns%2C%20eBPF&descAlignY=53&descSize=15&descColor=00ff9c" width="100%" alt="Redmi-Note-10-HomeLab" />
+
+<img src="https://img.shields.io/badge/Linux%20kernel-00ff9c?style=for-the-badge&logo=linux&logoColor=00ff9c&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/eBPF-e10600?style=for-the-badge&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/network%20namespaces-e10600?style=for-the-badge&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/OpenVPN-00ff9c?style=for-the-badge&labelColor=0d0d0d" />
+
+</div>
+
+> Turning an Android smartphone (Xiaomi Redmi Note 10 5G / camellia) into a Linux server
 > Kernel, network namespaces, eBPF, zram, exit-node VM
 
-## Objectif
+## Objective
 
-Utiliser un téléphone Android rooté comme serveur bare-metal Linux 24/7 : routage, isolation réseau, tunnel VPN, exit-node.
+Use a rooted Android phone as a 24/7 bare-metal Linux server: routing, network isolation, VPN tunnel, exit-node.
 
 ## Phases
 
-| Phase | Description | Artefact |
+| Phase | Description | Artifact |
 |-------|-------------|----------|
-| 0 | Préface & architecture | `00_Preface.md` |
+| 0 | Preface & architecture | `00_Preface.md` |
 | 1 | Kali + debloat + VPNGate | `Addendum_01_Kali_Debloat.md` |
-| 2 | Routage kernel & namespaces | `Addendum_02_Routage_Kernel_Namespaces.md` |
-| 3 | Sécurité & firewall & DNS | `Addendum_03_DNS_Firewall_Risques.md` |
-| 4 | Namespace anonyme (`anon_ns`) | `Addendum_04_Creation_Anon_Namespace.md` + script PS1 |
-| 5 | Diagnostic eBPF & ICMP | `Addendum_05_Diagnostic_eBPF_ICMP.md` |
-| 6 | OpenVPN tunnel & bascule | `Addendum_06_Bascule_OpenVPN.md` |
-| IV | Namespace anonyme (addendum) | `Addendum_IV_AnonNamespace.md` |
-| VI | VM Exit-Node (WinNAT/ICS bug) | `Addendum_VI_VM_ExitNode.md` |
+| 2 | Kernel routing & namespaces | `Addendum_02_Routage_Kernel_Namespaces.md` |
+| 3 | Security & firewall & DNS | `Addendum_03_DNS_Firewall_Risques.md` |
+| 4 | Anonymous namespace (`anon_ns`) | `Addendum_04_Creation_Anon_Namespace.md` + PS1 script |
+| 5 | eBPF & ICMP diagnostics | `Addendum_05_Diagnostic_eBPF_ICMP.md` |
+| 6 | OpenVPN tunnel & switchover | `Addendum_06_Bascule_OpenVPN.md` |
+| IV | Anonymous namespace (addendum) | `Addendum_IV_AnonNamespace.md` |
+| VI | Exit-node VM (WinNAT/ICS bug) | `Addendum_VI_VM_ExitNode.md` |
 
-## Bug WinNAT/ICS documenté
+## Documented WinNAT/ICS bug
 
-Diagnostic d'une limitation native de l'hyperviseur Windows :
-- `WinNAT` (`New-NetNat`) et `ICS` ne tolèrent **qu'une seule interface NAT active par hôte**
-- Tentative de double-NAT parallèle → état indéterminé (`COM 0x80040201`)
-- Sources : Microsoft Learn, Q&A système
-- Pivot : abandon Parrot VM → Windows Server RRAS dédié
+Diagnosis of a native Windows hypervisor limitation:
+- `WinNAT` (`New-NetNat`) and `ICS` tolerate **only one active NAT interface per host**
+- Attempting parallel double-NAT → indeterminate state (`COM 0x80040201`)
+- Sources: Microsoft Learn, system Q&A
+- Pivot: dropped the Parrot VM → dedicated Windows Server RRAS
 
 ## Structure
 
@@ -40,7 +46,7 @@ Diagnostic d'une limitation native de l'hyperviseur Windows :
 │   ├── 01_Phase_1_Kali_et_Debloat/
 │   ├── 02_Phase_2_Routage_Kernel/
 │   ├── 03_Phase_3_Securite_Firewall/
-│   ├── 04_Phase_4_Anon_Namespace/  (+ script .ps1)
+│   ├── 04_Phase_4_Anon_Namespace/  (+ .ps1 script)
 │   ├── 05_Phase_5_Diagnostic_Avance/
 │   └── 06_Phase_6_OpenVPN_Tunnel/
 ├── Addendum_IV_AnonNamespace.md
@@ -48,14 +54,24 @@ Diagnostic d'une limitation native de l'hyperviseur Windows :
 └── CONTEXT_RESUME_WINSERVER_EXITNODE.md
 ```
 
-## Ce que ce projet démontre
+## What this project demonstrates
 
-1. **Kernel Linux bas niveau** — network namespaces (`ip netns`), veth, eBPF
-2. **Diagnostic de bugs systèmes complexes** — WinNAT/ICS mono-NAT limitation
-3. **Gestion de ressources contraintes** — zram, swapfile, monitoring batterie 24/7
-4. **Résilience** — pivot architectural propre face à une limitation non contournable
+1. **Low-level Linux kernel** — network namespaces (`ip netns`), veth, eBPF
+2. **Diagnosing complex system bugs** — WinNAT/ICS single-NAT limitation
+3. **Managing constrained resources** — zram, swapfile, 24/7 battery monitoring
+4. **Resilience** — a clean architectural pivot when facing a non-negotiable limitation
 
-## Auteur
+## Author
 
-Malik — étudiant DEP Soutien Informatique, autodidacte
-Projet : 13-16 août 2026
+Malik — IT Support student (DEP), self-taught
+Project: August 13–16, 2026
+
+---
+
+<div align="center">
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:00ff9c,50:03150c,100:e10600&height=100&section=footer" width="100%" alt="" />
+
+**⚡ Built on CPU. Proven on disk. ⚡**
+
+</div>
