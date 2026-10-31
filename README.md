@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<p align="center"><img src="https://raw.githubusercontent.com/MlkBlk-IT/Redmi-Note-10-HomeLab/main/docs/mlkblk-banner.svg" width="100%" alt="Redmi-Note-10-HomeLab — Malik Belkacemi · MLKBLK-IT" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/MlkBlk-IT/MlkBlk-IT/main/assets/mlkblk-banner-v2.svg" width="100%" alt="Redmi-Note-10-HomeLab — Malik Belkacemi · MLKBLK-IT" /></p>
 
 <img src="https://img.shields.io/badge/Linux%20kernel-00ff9c?style=for-the-badge&logo=linux&logoColor=00ff9c&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/eBPF-e10600?style=for-the-badge&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/network%20namespaces-e10600?style=for-the-badge&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/OpenVPN-00ff9c?style=for-the-badge&labelColor=0d0d0d" />
 
