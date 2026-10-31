@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<p align="center"><img src="https://raw.githubusercontent.com/MlkBlk-IT/Redmi-Note-10-HomeLab/main/docs/readme-header.svg" width="100%" alt="Redmi-Note-10-HomeLab visual header" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/MlkBlk-IT/Redmi-Note-10-HomeLab/main/docs/mlkblk-banner.svg" width="100%" alt="Redmi-Note-10-HomeLab — Malik Belkacemi · MLKBLK-IT" /></p>
 
 <img src="https://img.shields.io/badge/Linux%20kernel-00ff9c?style=for-the-badge&logo=linux&logoColor=00ff9c&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/eBPF-e10600?style=for-the-badge&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/network%20namespaces-e10600?style=for-the-badge&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/OpenVPN-00ff9c?style=for-the-badge&labelColor=0d0d0d" />
 
@@ -75,5 +75,14 @@ Project: August 13–16, 2026
 <img src="https://capsule-render.vercel.app/api?type=waving&color=0:00ff9c,50:03150c,100:e10600&height=100&section=footer" width="100%" alt="" />
 
 **⚡ Built on CPU. Proven on disk. ⚡**
+
+</div>
+
+
+---
+
+<div align="center">
+
+<sub>Original project and documentation by <strong>Malik Belkacemi · MLKBLK-IT</strong> · © 2026</sub>
 
 </div>
