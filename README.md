@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:e10600,50:1a0505,100:00ff9c&height=140&section=header&text=Redmi-Note-10-HomeLab&fontSize=42&fontColor=e10600&fontAlignY=32&desc=An%20Android%20phone%20reborn%20as%20a%20Linux%20server%20%E2%80%94%20kernel%2C%20netns%2C%20eBPF&descAlignY=53&descSize=15&descColor=00ff9c" width="100%" alt="Redmi-Note-10-HomeLab" />
+<p align="center"><img src="https://raw.githubusercontent.com/MlkBlk-IT/Redmi-Note-10-HomeLab/main/docs/readme-header.svg" width="100%" alt="Redmi-Note-10-HomeLab visual header" /></p>
 
 <img src="https://img.shields.io/badge/Linux%20kernel-00ff9c?style=for-the-badge&logo=linux&logoColor=00ff9c&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/eBPF-e10600?style=for-the-badge&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/network%20namespaces-e10600?style=for-the-badge&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/OpenVPN-00ff9c?style=for-the-badge&labelColor=0d0d0d" />
 
