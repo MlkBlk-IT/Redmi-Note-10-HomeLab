@@ -68,6 +68,11 @@ Diagnosis of a native Windows hypervisor limitation:
 Malik — IT Support student (DEP), self-taught
 Project: August 13–16, 2026
 
+
+## Ownership and license
+
+[Project origin and evidence](PROJECT-ORIGIN.md) · [License](LICENSE)
+
 ---
 
 <div align="center">
