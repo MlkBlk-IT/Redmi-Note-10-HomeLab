@@ -4,7 +4,7 @@
 
 <p align="center"><img src="https://raw.githubusercontent.com/MlkBlk-IT/Redmi-Note-10-HomeLab/main/docs/mlkblk-banner-v2.svg" width="100%" alt="Redmi-Note-10-HomeLab — Malik Belkacemi · MLKBLK-IT" /></p>
 
-<img src="https://img.shields.io/badge/Linux%20kernel-00ff9c?style=for-the-badge&logo=linux&logoColor=00ff9c&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/eBPF-e10600?style=for-the-badge&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/network%20namespaces-e10600?style=for-the-badge&labelColor=0d0d0d" /> <img src="https://img.shields.io/badge/OpenVPN-00ff9c?style=for-the-badge&labelColor=0d0d0d" />
+<img src="https://img.shields.io/badge/Linux%20kernel-2de2ff?style=for-the-badge&logo=linux&logoColor=2de2ff&labelColor=0d0a2b" /> <img src="https://img.shields.io/badge/eBPF-ff5fa2?style=for-the-badge&labelColor=0d0a2b" /> <img src="https://img.shields.io/badge/network%20namespaces-ff5fa2?style=for-the-badge&labelColor=0d0a2b" /> <img src="https://img.shields.io/badge/OpenVPN-2de2ff?style=for-the-badge&labelColor=0d0a2b" />
 
 </div>
 
@@ -77,7 +77,7 @@ Project: August 13–16, 2026
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&color=0:00ff9c,50:03150c,100:e10600&height=100&section=footer" width="100%" alt="" />
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:2de2ff,50:0d0a2b,100:ff5fa2&height=100&section=footer" width="100%" alt="" />
 
 **⚡ Built on CPU. Proven on disk. ⚡**
 
