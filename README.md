@@ -10,6 +10,13 @@
 
 > Turning an Android smartphone (Xiaomi Redmi Note 10 5G / camellia) into a Linux server
 > Kernel, network namespaces, eBPF, zram, exit-node VM
+## At a glance
+
+| | |
+|---|---|
+| **Goal** | Turn a Xiaomi Redmi Note 10 5G (**camellia**) into a Linux server. |
+| **Stack** | Linux kernel · network namespaces · eBPF · zram · OpenVPN exit node |
+| **Type** | A documented lab — phases, a reproduced WinNAT/ICS bug, and what it demonstrates |
 
 ## Objective
 
